@@ -1,0 +1,112 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6"> <![endif]--> <!--[if IE 7 ]>    <html lang="en" class="no-js ie7"> <![endif]--> <!--[if IE 8 ]>    <html lang="en" class="no-js ie8"> <![endif]--> <!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title></title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css?v=2">
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div id="container">
+    <div id="timeline">
+      <script type="text/html">
+        {{#collection contentBinding="NewTwitter.timelineController" tagName="div" itemClass="tweet"}}
+          <div class="tweet-icon">
+            <img {{bindAttr src="content.profileImage"}}>
+          </div>
+          <div class="tweet-container">
+            <div class="tweet-author">
+              {{content.screenName}}
+              <span class="tweet-author-name">{{content.name}}</span>
+            </div>
+            <div class="tweet-body">{{content.body}}</div>
+            <span class="tweet-time">{{content.humanTime}}</div>
+          </div>
+        {{/collection}}
+      </script>
+    </div>
+
+    <div id="right-bar">
+
+      <div id="your_tweets">
+        <script type="text/html">
+          {{#view NewTwitter.LastTweetView}}
+            <h3>Your Tweets {{count}}</h3>
+            {{content.humanTime}}: {{truncatedBody}}
+          {{/view}}
+        </script>
+      </div>
+
+      <div id="following">
+        <script type="text/html">
+          {{#view NewTwitter.FollowingView}}
+            <h3>Following {{count}}</h3>
+            {{#collection contentBinding="NewTwitter.userController.friends" tagName="span" itemTagName="span"}}
+              <img width="24" {{bindAttr src="content.image"}}>
+            {{/collection}}
+          {{/view}}
+        </script>
+      </div>
+
+      <div id="followers">
+        <script type="text/html">
+          {{#view NewTwitter.FollowersView}}
+            <h3>Followers {{count}}</h3>
+            {{#collection contentBinding="NewTwitter.userController.followers" tagName="span" itemTagName="span"}}
+              <img width="24" {{bindAttr src="content.image"}}>
+            {{/collection}}
+          {{/view}}
+        </script>
+      </div>
+
+    </div>
+    <br style="clear: both">
+  </div>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.6.1.min.js"%3E%3C/script%3E'))</script>
+  <script src="js/libs/sproutcore-2.0.beta.1.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="http://timeago.yarp.com/jquery.timeago.js"></script>
+  <script>
+    function load(screenName) {
+      $.getJSON("https://twitter.com/status/user_timeline/" + screenName + ".json?count=30&callback=?", function(data) {
+        NewTwitter.timelineController.loadTweets(data);
+      });
+      $.getJSON("http://api.twitter.com/1/users/show.json?screen_name=" + screenName + "&include_entities=true&callback=?", function(data) {
+        NewTwitter.userController.loadUser(data);
+      });
+      $.getJSON("https://api.twitter.com/1/friends/ids.json?screen_name=" + screenName + "&include_entities=true&callback=?", function(data) {
+        NewTwitter.userController.loadFriends(data);
+      });
+      $.getJSON("https://api.twitter.com/1/followers/ids.json?screen_name=" + screenName + "&include_entities=true&callback=?", function(data) {
+        NewTwitter.userController.loadFollowers(data);
+      });
+    }
+
+    function currentScreenName() {
+      if (location.hash) { return location.hash.replace('#', ''); }
+      return 'ebryn';
+    }
+
+    load(currentScreenName());
+
+    $(window).bind('hashchange', function() {
+      load(currentScreenName());
+    });
+  </script>
+</body>
+</html>
